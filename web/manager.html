@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менеджер - Warehouse Control</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="logo">WarehouseControl</div>
+    <div class="admin-page">
+        <h1>Панель менеджера</h1>
+        <button id="logoutBtn">Выйти</button>
+        <button id="createItemBtn">Добавить товар</button>
+        <div id="createForm" style="display: none; margin: 20px 0;">
+            <h3>Новый товар</h3>
+            <div class="form-group">
+                <label>Название:</label>
+                <input type="text" id="itemName" required>
+            </div>
+            <div class="form-group">
+                <label>Количество:</label>
+                <input type="number" id="itemQuantity" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Цена:</label>
+                <input type="number" id="itemPrice" min="0" step="0.01" required>
+            </div>
+            <button id="publishItemBtn">Сохранить</button>
+            <button id="cancelCreateBtn">Отмена</button>
+        </div>
+        <div id="itemsList" style="margin-top: 30px;">
+            <h2>Список товаров</h2>
+            <div id="itemsContainer">
+                <div class="item-header">
+                    <span class="item-id">ID</span>
+                    <span class="item-name">Название</span>
+                    <span class="item-quantity">Количество</span>
+                    <span class="item-price">Цена</span>
+                    <span class="item-actions-header">Действия</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeEditModal">&times;</span>
+            <h3>Редактировать товар</h3>
+            <input type="hidden" id="editItemId">
+            <div class="form-group">
+                <label>Название:</label>
+                <input type="text" id="editItemName" required>
+            </div>
+            <div class="form-group">
+                <label>Количество:</label>
+                <input type="number" id="editItemQuantity" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Цена:</label>
+                <input type="number" id="editItemPrice" min="0" step="0.01" required>
+            </div>
+            <button id="updateItemBtn">Обновить</button>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+            if (role !== 'manager') {
+                window.location.href = '/';
+                return;
+            }
+            loadItems();
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('userRole');
+                window.location.href = '/';
+            });
+
+            document.getElementById('createItemBtn').addEventListener('click', () => {
+                document.getElementById('createForm').style.display = 'block';
+            });
+            document.getElementById('cancelCreateBtn').addEventListener('click', () => {
+                document.getElementById('createForm').style.display = 'none';
+                clearCreateForm();
+            });
+            document.getElementById('publishItemBtn').addEventListener('click', createItem);
+
+            document.getElementById('closeEditModal').onclick = () => {
+                document.getElementById('editModal').style.display = 'none';
+            };
+            window.onclick = (event) => {
+                if (event.target == document.getElementById('editModal')) {
+                    document.getElementById('editModal').style.display = 'none';
+                }
+            };
+        });
+
+        function clearCreateForm() {
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemQuantity').value = '';
+            document.getElementById('itemPrice').value = '';
+        }
+
+        async function createItem() {
+            const name = document.getElementById('itemName').value;
+            const quantity = parseInt(document.getElementById('itemQuantity').value);
+            const price = parseFloat(document.getElementById('itemPrice').value);
+
+            if (!name || isNaN(quantity) || isNaN(price)) {
+                showNotification('Заполните все поля', true);
+                return;
+            }
+
+            const itemData = { name, quantity, price };
+
+            try {
+                const response = await fetch('/items', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(itemData)
+                });
+                if (!response.ok) throw new Error('Ошибка создания');
+                showNotification('Товар добавлен');
+                document.getElementById('createForm').style.display = 'none';
+                clearCreateForm();
+                loadItems();
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        }
+
+        window.editItem = function(id, name, quantity, price) {
+            document.getElementById('editItemId').value = id;
+            document.getElementById('editItemName').value = name;
+            document.getElementById('editItemQuantity').value = quantity;
+            document.getElementById('editItemPrice').value = price;
+            document.getElementById('editModal').style.display = 'block';
+        };
+
+        document.getElementById('updateItemBtn').addEventListener('click', async () => {
+            const id = document.getElementById('editItemId').value;
+            const name = document.getElementById('editItemName').value;
+            const quantity = parseInt(document.getElementById('editItemQuantity').value);
+            const price = parseFloat(document.getElementById('editItemPrice').value);
+
+            if (!name || isNaN(quantity) || isNaN(price)) {
+                showNotification('Заполните все поля', true);
+                return;
+            }
+
+            const itemData = { name, quantity, price };
+
+            try {
+                const response = await fetch(`/items/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(itemData)
+                });
+                if (!response.ok) throw new Error('Ошибка обновления');
+                showNotification('Товар обновлён');
+                document.getElementById('editModal').style.display = 'none';
+                loadItems();
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -30,7 +30,7 @@ func main() {
 	// настраиваем логгер
 	appLogger, err := logger.InitLogger(
 		logger.ZapEngine,
-		"SalesTracker",
+		"WarehouseControlAntiPattern",
 		"prod",
 		logger.WithLevel(logger.InfoLevel),
 	)

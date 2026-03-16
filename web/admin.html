@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Администратор - Warehouse Control</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="logo">WarehouseControl</div>
+    <div class="admin-page">
+        <h1>Панель администратора</h1>
+        <button id="logoutBtn">Выйти</button>
+        <button id="createItemBtn">Добавить товар</button>
+        <button id="exportCsvBtn">Экспорт CSV</button>
+        <div id="createForm" style="display: none; margin: 20px 0;">
+            <h3>Новый товар</h3>
+            <div class="form-group">
+                <label>Название:</label>
+                <input type="text" id="itemName" required>
+            </div>
+            <div class="form-group">
+                <label>Количество:</label>
+                <input type="number" id="itemQuantity" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Цена:</label>
+                <input type="number" id="itemPrice" min="0" step="0.01" required>
+            </div>
+            <button id="publishItemBtn">Сохранить</button>
+            <button id="cancelCreateBtn">Отмена</button>
+        </div>
+        <div id="itemsList" style="margin-top: 30px;">
+            <h2>Список товаров</h2>
+            <div id="itemsContainer">
+                <div class="item-header">
+                    <span class="item-id">ID</span>
+                    <span class="item-name">Название</span>
+                    <span class="item-quantity">Количество</span>
+                    <span class="item-price">Цена</span>
+                    <span class="item-actions-header">Действия</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeEditModal">&times;</span>
+            <h3>Редактировать товар</h3>
+            <input type="hidden" id="editItemId">
+            <div class="form-group">
+                <label>Название:</label>
+                <input type="text" id="editItemName" required>
+            </div>
+            <div class="form-group">
+                <label>Количество:</label>
+                <input type="number" id="editItemQuantity" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Цена:</label>
+                <input type="number" id="editItemPrice" min="0" step="0.01" required>
+            </div>
+            <button id="updateItemBtn">Обновить</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно истории -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" id="closeHistoryModal">&times;</span>
+            <h3>История изменений товара</h3>
+            <div id="historyContainer"></div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+            if (role !== 'admin') {
+                window.location.href = '/';
+                return;
+            }
+            loadItems();
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('userRole');
+                window.location.href = '/';
+            });
+
+            document.getElementById('createItemBtn').addEventListener('click', () => {
+                document.getElementById('createForm').style.display = 'block';
+            });
+            document.getElementById('cancelCreateBtn').addEventListener('click', () => {
+                document.getElementById('createForm').style.display = 'none';
+                clearCreateForm();
+            });
+            document.getElementById('publishItemBtn').addEventListener('click', createItem);
+            document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+
+            document.getElementById('closeEditModal').onclick = () => {
+                document.getElementById('editModal').style.display = 'none';
+            };
+            document.getElementById('closeHistoryModal').onclick = () => {
+                document.getElementById('historyModal').style.display = 'none';
+            };
+            window.onclick = (event) => {
+                if (event.target == document.getElementById('editModal')) {
+                    document.getElementById('editModal').style.display = 'none';
+                }
+                if (event.target == document.getElementById('historyModal')) {
+                    document.getElementById('historyModal').style.display = 'none';
+                }
+            };
+        });
+
+        function clearCreateForm() {
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemQuantity').value = '';
+            document.getElementById('itemPrice').value = '';
+        }
+
+        async function createItem() {
+            const name = document.getElementById('itemName').value;
+            const quantity = parseInt(document.getElementById('itemQuantity').value);
+            const price = parseFloat(document.getElementById('itemPrice').value);
+
+            if (!name || isNaN(quantity) || isNaN(price)) {
+                showNotification('Заполните все поля', true);
+                return;
+            }
+
+            const itemData = { name, quantity, price };
+
+            try {
+                const response = await fetch('/items', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(itemData)
+                });
+                if (!response.ok) throw new Error('Ошибка создания');
+                showNotification('Товар добавлен');
+                document.getElementById('createForm').style.display = 'none';
+                clearCreateForm();
+                loadItems();
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        }
+
+        window.editItem = function(id, name, quantity, price) {
+            document.getElementById('editItemId').value = id;
+            document.getElementById('editItemName').value = name;
+            document.getElementById('editItemQuantity').value = quantity;
+            document.getElementById('editItemPrice').value = price;
+            document.getElementById('editModal').style.display = 'block';
+        };
+
+        document.getElementById('updateItemBtn').addEventListener('click', async () => {
+            const id = document.getElementById('editItemId').value;
+            const name = document.getElementById('editItemName').value;
+            const quantity = parseInt(document.getElementById('editItemQuantity').value);
+            const price = parseFloat(document.getElementById('editItemPrice').value);
+
+            if (!name || isNaN(quantity) || isNaN(price)) {
+                showNotification('Заполните все поля', true);
+                return;
+            }
+
+            const itemData = { name, quantity, price };
+
+            try {
+                const response = await fetch(`/items/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(itemData)
+                });
+                if (!response.ok) throw new Error('Ошибка обновления');
+                showNotification('Товар обновлён');
+                document.getElementById('editModal').style.display = 'none';
+                loadItems();
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        });
+
+        window.deleteItem = async function(id) {
+            if (!confirm('Удалить товар?')) return;
+            try {
+                const response = await fetch(`/items/${id}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Ошибка удаления');
+                showNotification('Товар удалён');
+                loadItems();
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        };
+
+        window.showHistory = async function(id) {
+            try {
+                const response = await fetch(`/items/${id}/history`);
+                if (!response.ok) throw new Error('Ошибка загрузки истории');
+                const history = await response.json();
+                renderHistory(history);
+                document.getElementById('historyModal').style.display = 'block';
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        };
+
+        function renderHistory(history) {
+            const container = document.getElementById('historyContainer');
+            if (!history.length) {
+                container.innerHTML = '<p>История пуста</p>';
+                return;
+            }
+            let html = '<table style="width:100%; border-collapse: collapse;">' +
+                '<tr><th>Дата</th><th>Действие</th><th>Пользователь</th><th>Изменения</th></tr>';
+            history.forEach(record => {
+                html += '<tr>';
+                html += `<td>${new Date(record.changed_at).toLocaleString()}</td>`;
+                html += `<td>${record.action}</td>`;
+                html += `<td>${record.changed_by || '?'}</td>`;
+                let changes = '';
+                if (record.action === 'UPDATE') {
+                    changes = 'Старое: ' + JSON.stringify(record.old_data) + ' Новое: ' + JSON.stringify(record.new_data);
+                } else if (record.action === 'INSERT') {
+                    changes = JSON.stringify(record.new_data);
+                } else if (record.action === 'DELETE') {
+                    changes = JSON.stringify(record.old_data);
+                }
+                html += `<td>${changes}</td>`;
+                html += '</tr>';
+            });
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        async function exportCSV() {
+            try {
+                const response = await fetch('/export/csv');
+                if (!response.ok) throw new Error('Ошибка экспорта');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'items.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

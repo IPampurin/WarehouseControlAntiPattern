@@ -1,0 +1,212 @@
+/* ===== ОБЩИЕ СТИЛИ ===== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #2b2b2b, #a0a0a0);
+}
+
+.logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #8A2BE2;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    letter-spacing: 2px;
+    z-index: 1000;
+}
+
+/* ===== ТИТУЛЬНАЯ СТРАНИЦА (три круга) ===== */
+.triple-layout {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 80%;
+    height: 80vh;
+    max-width: 1200px;
+    margin: 10vh auto 0;
+}
+
+.circle-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circle-button {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background-color: #8A2BE2;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.3s, background-color 0.3s;
+    border: 2px solid #333;
+}
+
+.circle-button:hover {
+    transform: scale(1.05);
+    background-color: #9B30FF;
+}
+
+/* ===== СТРАНИЦЫ РОЛЕЙ ===== */
+.admin-page, .user-page {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: transparent;
+    border-radius: 10px;
+}
+
+.admin-page h1, .user-page h1,
+.admin-page h2, .user-page h2 {
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Кнопки */
+button {
+    background-color: #8A2BE2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #9B30FF;
+}
+
+input, textarea {
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: white;
+}
+
+/* ===== ТАБЛИЦА ТОВАРОВ ===== */
+.item-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    background: rgba(0,0,0,0.5);
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.item-header .item-id { min-width: 60px; }
+.item-header .item-name { min-width: 150px; }
+.item-header .item-quantity { min-width: 80px; }
+.item-header .item-price { min-width: 80px; }
+.item-header .item-actions-header { min-width: 120px; }
+
+.item-row {
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.item-row .item-id { min-width: 60px; }
+.item-row .item-name { min-width: 150px; font-weight: bold; }
+.item-row .item-quantity { min-width: 80px; }
+.item-row .item-price { min-width: 80px; }
+.item-row .item-actions { min-width: 120px; display: flex; gap: 5px; }
+
+.item-actions button {
+    margin-left: 0;
+}
+
+/* ===== МОДАЛЬНЫЕ ОКНА ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    color: black;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
+
+/* ===== УВЕДОМЛЕНИЯ ===== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    display: none;
+    z-index: 1000;
+}
+
+.notification.error {
+    background: #f44336;
+}

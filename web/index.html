@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Control</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="logo">WarehouseControl</div>
+    <div class="triple-layout">
+        <div class="circle-container">
+            <a href="/admin.html" class="circle-button" onclick="setRole('admin')">Администратор</a>
+        </div>
+        <div class="circle-container">
+            <a href="/manager.html" class="circle-button" onclick="setRole('manager')">Менеджер</a>
+        </div>
+        <div class="circle-container">
+            <a href="/viewer.html" class="circle-button" onclick="setRole('viewer')">Наблюдатель</a>
+        </div>
+    </div>
+    <script>
+        function setRole(role) {
+            localStorage.setItem('userRole', role);
+        }
+    </script>
+</body>
+</html>

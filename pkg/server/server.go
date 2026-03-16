@@ -34,15 +34,17 @@ func Run(ctx context.Context, cfgServer *configuration.ConfServer, log logger.Lo
 		engine.GET("/items", api.GetItemsPeriodSorted(svc, log))                     // получить список записей за период с сортировкой
 		engine.PUT("/items/:id", api.UpdateItem(svc, log))                           // обновить запись
 		engine.DELETE("/items/:id", api.DelItem(svc, log))                           // удалить запись
+		engine.GET("/items/:id/history", api.GetItemsHistory(svc, log))              // получить историю по записи
+		engine.GET("/export/csv", api.ExportCSVFile(svc, log))                       // экспорт записей за период в формате CSV
 	*/
 	/*
 		engine.GET("/analytics", api.GetAnalytic(svc, log))                          // общая аналитика за период
 		engine.GET("/analytics/by-category", api.GetAnalyticGroupCategory(svc, log)) // аналитика с группировкой по категориям
-		engine.GET("/export/csv", api.ExportCSVFile(svc, log))                       // экспорт записей за период в формате CSV
 	*/
 	// раздаём статические файлы из папки ./web
 	engine.Static("/static", "./web")
 	// отдельные страницы
+	engine.StaticFile("/", "./web/index.html")
 	engine.StaticFile("/admin.html", "./web/admin.html")
 	engine.StaticFile("/manager.html", "./web/manager.html")
 	engine.StaticFile("/viewer.html", "./web/viewer.html")
