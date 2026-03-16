@@ -15,7 +15,7 @@ function getRole() {
     return localStorage.getItem('userRole');
 }
 
-// Загрузка списка товаров
+// Загрузка списка товаров (используется на всех страницах)
 async function loadItems() {
     try {
         const response = await fetch('/items');
@@ -27,20 +27,19 @@ async function loadItems() {
     }
 }
 
-// Отрисовка таблицы товаров (учитывает роль)
+// Отрисовка товаров с учётом роли
 function renderItems(items) {
     const container = document.getElementById('itemsContainer');
     if (!container) return;
 
     const role = getRole();
 
-    // Сохраняем заголовок (первый div с классом item-header)
+    // Сохраняем заголовок
     const header = container.querySelector('.item-header');
     container.innerHTML = '';
     if (header) {
         container.appendChild(header);
     } else {
-        // Если заголовка почему-то нет, создаём его
         const newHeader = document.createElement('div');
         newHeader.className = 'item-header';
         newHeader.innerHTML = `
@@ -60,10 +59,8 @@ function renderItems(items) {
 
         let actionsHtml = '';
         if (role !== 'viewer') {
-            // Кнопка редактирования для всех, кроме viewer
             actionsHtml += `<button class="edit-btn" data-id="${item.id}" data-name="${item.name}" data-quantity="${item.quantity}" data-price="${item.price}">Редактировать</button>`;
             if (role === 'admin') {
-                // Только admin видит удаление и историю
                 actionsHtml += `<button class="delete-btn" data-id="${item.id}">Удалить</button>`;
                 actionsHtml += `<button class="history-btn" data-id="${item.id}">История</button>`;
             }
@@ -89,8 +86,6 @@ function renderItems(items) {
             const price = e.target.dataset.price;
             if (typeof window.editItem === 'function') {
                 window.editItem(id, name, quantity, price);
-            } else {
-                console.error('editItem not defined');
             }
         });
     });
@@ -107,8 +102,8 @@ function renderItems(items) {
     document.querySelectorAll('.history-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const id = e.target.dataset.id;
-            if (typeof window.showHistory === 'function') {
-                window.showHistory(id);
+            if (typeof window.showItemHistory === 'function') {
+                window.showItemHistory(id);
             }
         });
     });

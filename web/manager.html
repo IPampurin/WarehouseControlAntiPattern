@@ -43,7 +43,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно редактирования -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeEditModal">&times;</span>
@@ -94,6 +93,7 @@
             document.getElementById('closeEditModal').onclick = () => {
                 document.getElementById('editModal').style.display = 'none';
             };
+            document.getElementById('updateItemBtn').addEventListener('click', updateItem);
             window.onclick = (event) => {
                 if (event.target == document.getElementById('editModal')) {
                     document.getElementById('editModal').style.display = 'none';
@@ -117,13 +117,11 @@
                 return;
             }
 
-            const itemData = { name, quantity, price };
-
             try {
                 const response = await fetch('/items', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(itemData)
+                    body: JSON.stringify({ name, quantity, price })
                 });
                 if (!response.ok) throw new Error('Ошибка создания');
                 showNotification('Товар добавлен');
@@ -143,7 +141,7 @@
             document.getElementById('editModal').style.display = 'block';
         };
 
-        document.getElementById('updateItemBtn').addEventListener('click', async () => {
+        async function updateItem() {
             const id = document.getElementById('editItemId').value;
             const name = document.getElementById('editItemName').value;
             const quantity = parseInt(document.getElementById('editItemQuantity').value);
@@ -154,13 +152,11 @@
                 return;
             }
 
-            const itemData = { name, quantity, price };
-
             try {
                 const response = await fetch(`/items/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(itemData)
+                    body: JSON.stringify({ name, quantity, price })
                 });
                 if (!response.ok) throw new Error('Ошибка обновления');
                 showNotification('Товар обновлён');
@@ -169,7 +165,7 @@
             } catch (err) {
                 showNotification('Ошибка: ' + err.message, true);
             }
-        });
+        }
     </script>
 </body>
 </html>

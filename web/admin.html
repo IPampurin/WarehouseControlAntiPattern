@@ -11,67 +11,170 @@
     <div class="admin-page">
         <h1>Панель администратора</h1>
         <button id="logoutBtn">Выйти</button>
-        <button id="createItemBtn">Добавить товар</button>
-        <button id="exportCsvBtn">Экспорт CSV</button>
-        <div id="createForm" style="display: none; margin: 20px 0;">
-            <h3>Новый товар</h3>
-            <div class="form-group">
-                <label>Название:</label>
-                <input type="text" id="itemName" required>
-            </div>
-            <div class="form-group">
-                <label>Количество:</label>
-                <input type="number" id="itemQuantity" min="0" required>
-            </div>
-            <div class="form-group">
-                <label>Цена:</label>
-                <input type="number" id="itemPrice" min="0" step="0.01" required>
-            </div>
-            <button id="publishItemBtn">Сохранить</button>
-            <button id="cancelCreateBtn">Отмена</button>
+
+        <!-- Вкладки -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="items">Товары</button>
+            <button class="tab-button" data-tab="history">История</button>
         </div>
-        <div id="itemsList" style="margin-top: 30px;">
-            <h2>Список товаров</h2>
-            <div id="itemsContainer">
-                <div class="item-header">
-                    <span class="item-id">ID</span>
-                    <span class="item-name">Название</span>
-                    <span class="item-quantity">Количество</span>
-                    <span class="item-price">Цена</span>
-                    <span class="item-actions-header">Действия</span>
+
+        <!-- Вкладка "Товары" -->
+        <div id="tab-items" class="tab-content active">
+            <button id="createItemBtn">Добавить товар</button>
+            <button id="exportItemsCsvBtn">Экспорт товаров CSV</button>
+            <div id="createForm" style="display: none; margin: 20px 0;">
+                <h3>Новый товар</h3>
+                <div class="form-group">
+                    <label>Название:</label>
+                    <input type="text" id="itemName" required>
+                </div>
+                <div class="form-group">
+                    <label>Количество:</label>
+                    <input type="number" id="itemQuantity" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Цена:</label>
+                    <input type="number" id="itemPrice" min="0" step="0.01" required>
+                </div>
+                <button id="publishItemBtn">Сохранить</button>
+                <button id="cancelCreateBtn">Отмена</button>
+            </div>
+            <div id="itemsList" style="margin-top: 30px;">
+                <h2>Список товаров</h2>
+                <div id="itemsContainer">
+                    <div class="item-header">
+                        <span class="item-id">ID</span>
+                        <span class="item-name">Название</span>
+                        <span class="item-quantity">Количество</span>
+                        <span class="item-price">Цена</span>
+                        <span class="item-actions-header">Действия</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Модальное окно редактирования -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeEditModal">&times;</span>
-            <h3>Редактировать товар</h3>
-            <input type="hidden" id="editItemId">
-            <div class="form-group">
-                <label>Название:</label>
-                <input type="text" id="editItemName" required>
+        <!-- Вкладка "История" (глобальная) -->
+        <div id="tab-history" class="tab-content">
+            <h2>История изменений</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Товар ID:</label>
+                    <input type="number" id="historyItemId" placeholder="все">
+                </div>
+                <div class="filter-group">
+                    <label>Дата с:</label>
+                    <input type="datetime-local" id="historyFromDate">
+                </div>
+                <div class="filter-group">
+                    <label>Дата по:</label>
+                    <input type="datetime-local" id="historyToDate">
+                </div>
+                <div class="filter-group">
+                    <label>Пользователь ID:</label>
+                    <input type="number" id="historyUserId">
+                </div>
+                <div class="filter-group">
+                    <label>Действие:</label>
+                    <select id="historyAction">
+                        <option value="">все</option>
+                        <option value="INSERT">INSERT</option>
+                        <option value="UPDATE">UPDATE</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <button id="applyHistoryFilters">Применить</button>
+                <button id="exportHistoryCsvBtn">Экспорт CSV</button>
             </div>
-            <div class="form-group">
-                <label>Количество:</label>
-                <input type="number" id="editItemQuantity" min="0" required>
+            <div id="historyTableContainer">
+                <!-- таблица истории будет построена динамически -->
+                <div class="history-header">
+                    <span class="history-select"></span>
+                    <span class="history-id">ID</span>
+                    <span class="history-item-id">Товар</span>
+                    <span class="history-action">Действие</span>
+                    <span class="history-user">Пользователь</span>
+                    <span class="history-date">Дата</span>
+                    <span class="history-changes">Изменения</span>
+                </div>
+                <div id="historyRows"></div>
             </div>
-            <div class="form-group">
-                <label>Цена:</label>
-                <input type="number" id="editItemPrice" min="0" step="0.01" required>
-            </div>
-            <button id="updateItemBtn">Обновить</button>
+            <button id="compareSelectedBtn" disabled>Сравнить выбранные (2)</button>
         </div>
-    </div>
 
-    <!-- Модальное окно истории -->
-    <div id="historyModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
-            <span class="close" id="closeHistoryModal">&times;</span>
-            <h3>История изменений товара</h3>
-            <div id="historyContainer"></div>
+        <!-- Модальное окно редактирования товара -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeEditModal">&times;</span>
+                <h3>Редактировать товар</h3>
+                <input type="hidden" id="editItemId">
+                <div class="form-group">
+                    <label>Название:</label>
+                    <input type="text" id="editItemName" required>
+                </div>
+                <div class="form-group">
+                    <label>Количество:</label>
+                    <input type="number" id="editItemQuantity" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Цена:</label>
+                    <input type="number" id="editItemPrice" min="0" step="0.01" required>
+                </div>
+                <button id="updateItemBtn">Обновить</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно истории товара (по кнопке "История" у товара) -->
+        <div id="itemHistoryModal" class="modal">
+            <div class="modal-content" style="max-width: 900px;">
+                <span class="close" id="closeItemHistoryModal">&times;</span>
+                <h3>История товара <span id="itemHistoryItemId"></span></h3>
+                <div class="filters" style="margin-bottom: 15px;">
+                    <div class="filter-group">
+                        <label>Дата с:</label>
+                        <input type="datetime-local" id="itemHistoryFromDate">
+                    </div>
+                    <div class="filter-group">
+                        <label>Дата по:</label>
+                        <input type="datetime-local" id="itemHistoryToDate">
+                    </div>
+                    <div class="filter-group">
+                        <label>Пользователь ID:</label>
+                        <input type="number" id="itemHistoryUserId">
+                    </div>
+                    <div class="filter-group">
+                        <label>Действие:</label>
+                        <select id="itemHistoryAction">
+                            <option value="">все</option>
+                            <option value="INSERT">INSERT</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                    <button id="applyItemHistoryFilters">Применить</button>
+                    <button id="exportItemHistoryCsvBtn">Экспорт CSV</button>
+                </div>
+                <div id="itemHistoryTableContainer">
+                    <div class="history-header">
+                        <span class="history-select"></span>
+                        <span class="history-id">ID</span>
+                        <span class="history-action">Действие</span>
+                        <span class="history-user">Пользователь</span>
+                        <span class="history-date">Дата</span>
+                        <span class="history-changes">Изменения</span>
+                    </div>
+                    <div id="itemHistoryRows"></div>
+                </div>
+                <button id="compareItemSelectedBtn" disabled>Сравнить выбранные (2)</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно сравнения версий -->
+        <div id="diffModal" class="modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="close" id="closeDiffModal">&times;</span>
+                <h3>Различия между версиями</h3>
+                <div id="diffContent"></div>
+            </div>
         </div>
     </div>
 
@@ -79,6 +182,7 @@
 
     <script src="/static/script.js"></script>
     <script>
+        // Инициализация страницы администратора
         document.addEventListener('DOMContentLoaded', () => {
             const role = localStorage.getItem('userRole');
             if (role !== 'admin') {
@@ -87,11 +191,27 @@
             }
             loadItems();
 
+            // Обработчики вкладок
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const tabId = e.target.dataset.tab;
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                    if (tabId === 'history') {
+                        loadGlobalHistory();
+                    }
+                });
+            });
+
+            // Выход
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 localStorage.removeItem('userRole');
                 window.location.href = '/';
             });
 
+            // Товары
             document.getElementById('createItemBtn').addEventListener('click', () => {
                 document.getElementById('createForm').style.display = 'block';
             });
@@ -100,24 +220,48 @@
                 clearCreateForm();
             });
             document.getElementById('publishItemBtn').addEventListener('click', createItem);
-            document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+            document.getElementById('exportItemsCsvBtn').addEventListener('click', exportItemsCSV);
 
+            // Модальное окно редактирования
             document.getElementById('closeEditModal').onclick = () => {
                 document.getElementById('editModal').style.display = 'none';
             };
-            document.getElementById('closeHistoryModal').onclick = () => {
-                document.getElementById('historyModal').style.display = 'none';
+            document.getElementById('updateItemBtn').addEventListener('click', updateItem);
+
+            // Модальное окно истории товара
+            document.getElementById('closeItemHistoryModal').onclick = () => {
+                document.getElementById('itemHistoryModal').style.display = 'none';
+            };
+            document.getElementById('applyItemHistoryFilters').addEventListener('click', () => {
+                const itemId = document.getElementById('itemHistoryItemId').textContent;
+                if (itemId) loadItemHistory(parseInt(itemId));
+            });
+            document.getElementById('exportItemHistoryCsvBtn').addEventListener('click', exportItemHistoryCSV);
+            document.getElementById('compareItemSelectedBtn').addEventListener('click', compareItemSelected);
+
+            // Глобальная история
+            document.getElementById('applyHistoryFilters').addEventListener('click', loadGlobalHistory);
+            document.getElementById('exportHistoryCsvBtn').addEventListener('click', exportGlobalHistoryCSV);
+            document.getElementById('compareSelectedBtn').addEventListener('click', compareGlobalSelected);
+
+            // Модальное окно diff
+            document.getElementById('closeDiffModal').onclick = () => {
+                document.getElementById('diffModal').style.display = 'none';
             };
             window.onclick = (event) => {
                 if (event.target == document.getElementById('editModal')) {
                     document.getElementById('editModal').style.display = 'none';
                 }
-                if (event.target == document.getElementById('historyModal')) {
-                    document.getElementById('historyModal').style.display = 'none';
+                if (event.target == document.getElementById('itemHistoryModal')) {
+                    document.getElementById('itemHistoryModal').style.display = 'none';
+                }
+                if (event.target == document.getElementById('diffModal')) {
+                    document.getElementById('diffModal').style.display = 'none';
                 }
             };
         });
 
+        // Вспомогательные функции для товаров
         function clearCreateForm() {
             document.getElementById('itemName').value = '';
             document.getElementById('itemQuantity').value = '';
@@ -134,13 +278,11 @@
                 return;
             }
 
-            const itemData = { name, quantity, price };
-
             try {
                 const response = await fetch('/items', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(itemData)
+                    body: JSON.stringify({ name, quantity, price })
                 });
                 if (!response.ok) throw new Error('Ошибка создания');
                 showNotification('Товар добавлен');
@@ -160,7 +302,7 @@
             document.getElementById('editModal').style.display = 'block';
         };
 
-        document.getElementById('updateItemBtn').addEventListener('click', async () => {
+        async function updateItem() {
             const id = document.getElementById('editItemId').value;
             const name = document.getElementById('editItemName').value;
             const quantity = parseInt(document.getElementById('editItemQuantity').value);
@@ -171,13 +313,11 @@
                 return;
             }
 
-            const itemData = { name, quantity, price };
-
             try {
                 const response = await fetch(`/items/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(itemData)
+                    body: JSON.stringify({ name, quantity, price })
                 });
                 if (!response.ok) throw new Error('Ошибка обновления');
                 showNotification('Товар обновлён');
@@ -186,14 +326,12 @@
             } catch (err) {
                 showNotification('Ошибка: ' + err.message, true);
             }
-        });
+        }
 
         window.deleteItem = async function(id) {
             if (!confirm('Удалить товар?')) return;
             try {
-                const response = await fetch(`/items/${id}`, {
-                    method: 'DELETE'
-                });
+                const response = await fetch(`/items/${id}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Ошибка удаления');
                 showNotification('Товар удалён');
                 loadItems();
@@ -202,55 +340,258 @@
             }
         };
 
-        window.showHistory = async function(id) {
+        // Загрузка истории для конкретного товара (по кнопке)
+        window.showItemHistory = async function(id) {
+            document.getElementById('itemHistoryItemId').textContent = id;
+            // Сбросить фильтры
+            document.getElementById('itemHistoryFromDate').value = '';
+            document.getElementById('itemHistoryToDate').value = '';
+            document.getElementById('itemHistoryUserId').value = '';
+            document.getElementById('itemHistoryAction').value = '';
+            await loadItemHistory(id);
+            document.getElementById('itemHistoryModal').style.display = 'block';
+        };
+
+        async function loadItemHistory(itemId) {
+            const params = new URLSearchParams();
+            params.append('item_id', itemId);
+            const fromDate = document.getElementById('itemHistoryFromDate').value;
+            const toDate = document.getElementById('itemHistoryToDate').value;
+            const userId = document.getElementById('itemHistoryUserId').value;
+            const action = document.getElementById('itemHistoryAction').value;
+            if (fromDate) params.append('from_date', new Date(fromDate).toISOString());
+            if (toDate) params.append('to_date', new Date(toDate).toISOString());
+            if (userId) params.append('user_id', userId);
+            if (action) params.append('action', action);
+
             try {
-                const response = await fetch(`/items/${id}/history`);
+                const response = await fetch(`/items/${itemId}/history?${params.toString()}`);
                 if (!response.ok) throw new Error('Ошибка загрузки истории');
                 const history = await response.json();
-                renderHistory(history);
-                document.getElementById('historyModal').style.display = 'block';
+                renderItemHistory(history);
             } catch (err) {
                 showNotification('Ошибка: ' + err.message, true);
             }
-        };
-
-        function renderHistory(history) {
-            const container = document.getElementById('historyContainer');
-            if (!history.length) {
-                container.innerHTML = '<p>История пуста</p>';
-                return;
-            }
-            let html = '<table style="width:100%; border-collapse: collapse;">' +
-                '<tr><th>Дата</th><th>Действие</th><th>Пользователь</th><th>Изменения</th></tr>';
-            history.forEach(record => {
-                html += '<tr>';
-                html += `<td>${new Date(record.changed_at).toLocaleString()}</td>`;
-                html += `<td>${record.action}</td>`;
-                html += `<td>${record.changed_by || '?'}</td>`;
-                let changes = '';
-                if (record.action === 'UPDATE') {
-                    changes = 'Старое: ' + JSON.stringify(record.old_data) + ' Новое: ' + JSON.stringify(record.new_data);
-                } else if (record.action === 'INSERT') {
-                    changes = JSON.stringify(record.new_data);
-                } else if (record.action === 'DELETE') {
-                    changes = JSON.stringify(record.old_data);
-                }
-                html += `<td>${changes}</td>`;
-                html += '</tr>';
-            });
-            html += '</table>';
-            container.innerHTML = html;
         }
 
-        async function exportCSV() {
+        function renderItemHistory(history) {
+            const container = document.getElementById('itemHistoryRows');
+            container.innerHTML = '';
+            history.forEach(record => {
+                const row = document.createElement('div');
+                row.className = 'history-row';
+                row.dataset.id = record.id;
+                row.innerHTML = `
+                    <span class="history-select"><input type="checkbox" class="history-checkbox" data-id="${record.id}"></span>
+                    <span class="history-id">${record.id}</span>
+                    <span class="history-action">${record.action}</span>
+                    <span class="history-user">${record.changed_by || '-'}</span>
+                    <span class="history-date">${new Date(record.changed_at).toLocaleString()}</span>
+                    <span class="history-changes">${formatChanges(record)}</span>
+                `;
+                container.appendChild(row);
+            });
+            // Обновить состояние кнопки сравнения
+            updateCompareButton('itemHistoryRows', 'compareItemSelectedBtn');
+            // Добавить обработчики на чекбоксы
+            document.querySelectorAll('#itemHistoryRows .history-checkbox').forEach(cb => {
+                cb.addEventListener('change', () => updateCompareButton('itemHistoryRows', 'compareItemSelectedBtn'));
+            });
+        }
+
+        // Загрузка глобальной истории
+        async function loadGlobalHistory() {
+            const params = new URLSearchParams();
+            const itemId = document.getElementById('historyItemId').value;
+            const fromDate = document.getElementById('historyFromDate').value;
+            const toDate = document.getElementById('historyToDate').value;
+            const userId = document.getElementById('historyUserId').value;
+            const action = document.getElementById('historyAction').value;
+            if (itemId) params.append('item_id', itemId);
+            if (fromDate) params.append('from_date', new Date(fromDate).toISOString());
+            if (toDate) params.append('to_date', new Date(toDate).toISOString());
+            if (userId) params.append('user_id', userId);
+            if (action) params.append('action', action);
+
             try {
-                const response = await fetch('/export/csv');
+                const response = await fetch(`/history?${params.toString()}`);
+                if (!response.ok) throw new Error('Ошибка загрузки глобальной истории');
+                const history = await response.json();
+                renderGlobalHistory(history);
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        }
+
+        function renderGlobalHistory(history) {
+            const container = document.getElementById('historyRows');
+            container.innerHTML = '';
+            history.forEach(record => {
+                const row = document.createElement('div');
+                row.className = 'history-row';
+                row.dataset.id = record.id;
+                row.innerHTML = `
+                    <span class="history-select"><input type="checkbox" class="history-checkbox" data-id="${record.id}"></span>
+                    <span class="history-id">${record.id}</span>
+                    <span class="history-item-id">${record.item_id}</span>
+                    <span class="history-action">${record.action}</span>
+                    <span class="history-user">${record.changed_by || '-'}</span>
+                    <span class="history-date">${new Date(record.changed_at).toLocaleString()}</span>
+                    <span class="history-changes">${formatChanges(record)}</span>
+                `;
+                container.appendChild(row);
+            });
+            updateCompareButton('historyRows', 'compareSelectedBtn');
+            document.querySelectorAll('#historyRows .history-checkbox').forEach(cb => {
+                cb.addEventListener('change', () => updateCompareButton('historyRows', 'compareSelectedBtn'));
+            });
+        }
+
+        // Форматирование изменений для отображения в таблице
+        function formatChanges(record) {
+            if (record.action === 'INSERT') {
+                return `Добавлен: ${JSON.stringify(record.new_data)}`;
+            } else if (record.action === 'DELETE') {
+                return `Удалён: ${JSON.stringify(record.old_data)}`;
+            } else if (record.action === 'UPDATE') {
+                const old = record.old_data || {};
+                const newd = record.new_data || {};
+                const changes = [];
+                if (old.name !== newd.name) changes.push(`name: ${old.name} → ${newd.name}`);
+                if (old.quantity !== newd.quantity) changes.push(`quantity: ${old.quantity} → ${newd.quantity}`);
+                if (old.price !== newd.price) changes.push(`price: ${old.price} → ${newd.price}`);
+                return changes.join('; ') || 'нет изменений';
+            }
+            return '';
+        }
+
+        // Обновление кнопки сравнения (активна только если выбрано ровно 2 чекбокса)
+        function updateCompareButton(rowsId, btnId) {
+            const checkboxes = document.querySelectorAll(`#${rowsId} .history-checkbox:checked`);
+            const btn = document.getElementById(btnId);
+            if (checkboxes.length === 2) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        // Сравнение выбранных версий (для глобальной истории)
+        async function compareGlobalSelected() {
+            const checkboxes = document.querySelectorAll('#historyRows .history-checkbox:checked');
+            if (checkboxes.length !== 2) return;
+            const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
+            await compareVersions(ids[0], ids[1]);
+        }
+
+        // Сравнение выбранных версий (для истории товара)
+        async function compareItemSelected() {
+            const checkboxes = document.querySelectorAll('#itemHistoryRows .history-checkbox:checked');
+            if (checkboxes.length !== 2) return;
+            const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
+            await compareVersions(ids[0], ids[1]);
+        }
+
+        // Запрос на сравнение и отображение diff
+        async function compareVersions(id1, id2) {
+            try {
+                const response = await fetch(`/history/compare?from=${id1}&to=${id2}`);
+                if (!response.ok) throw new Error('Ошибка сравнения');
+                const diff = await response.json();
+                showDiff(diff);
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        }
+
+        function showDiff(diff) {
+            const container = document.getElementById('diffContent');
+            if (!diff.changes || diff.changes.length === 0) {
+                container.innerHTML = '<p>Нет различий</p>';
+            } else {
+                let html = '<table class="diff-table"><tr><th>Поле</th><th>Было</th><th>Стало</th></tr>';
+                diff.changes.forEach(change => {
+                    html += `<tr><td>${change.field}</td><td>${JSON.stringify(change.old_value)}</td><td>${JSON.stringify(change.new_value)}</td></tr>`;
+                });
+                html += '</table>';
+                container.innerHTML = html;
+            }
+            document.getElementById('diffModal').style.display = 'block';
+        }
+
+        // Экспорт товаров в CSV
+        async function exportItemsCSV() {
+            try {
+                const response = await fetch('/export/items/csv');
                 if (!response.ok) throw new Error('Ошибка экспорта');
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'items.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        }
+
+        // Экспорт глобальной истории в CSV с текущими фильтрами
+        async function exportGlobalHistoryCSV() {
+            const params = new URLSearchParams();
+            const itemId = document.getElementById('historyItemId').value;
+            const fromDate = document.getElementById('historyFromDate').value;
+            const toDate = document.getElementById('historyToDate').value;
+            const userId = document.getElementById('historyUserId').value;
+            const action = document.getElementById('historyAction').value;
+            if (itemId) params.append('item_id', itemId);
+            if (fromDate) params.append('from_date', new Date(fromDate).toISOString());
+            if (toDate) params.append('to_date', new Date(toDate).toISOString());
+            if (userId) params.append('user_id', userId);
+            if (action) params.append('action', action);
+
+            try {
+                const response = await fetch(`/export/history/csv?${params.toString()}`);
+                if (!response.ok) throw new Error('Ошибка экспорта');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'history.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                showNotification('Ошибка: ' + err.message, true);
+            }
+        }
+
+        // Экспорт истории конкретного товара в CSV
+        async function exportItemHistoryCSV() {
+            const itemId = document.getElementById('itemHistoryItemId').textContent;
+            if (!itemId) return;
+            const params = new URLSearchParams();
+            params.append('item_id', itemId);
+            const fromDate = document.getElementById('itemHistoryFromDate').value;
+            const toDate = document.getElementById('itemHistoryToDate').value;
+            const userId = document.getElementById('itemHistoryUserId').value;
+            const action = document.getElementById('itemHistoryAction').value;
+            if (fromDate) params.append('from_date', new Date(fromDate).toISOString());
+            if (toDate) params.append('to_date', new Date(toDate).toISOString());
+            if (userId) params.append('user_id', userId);
+            if (action) params.append('action', action);
+
+            try {
+                const response = await fetch(`/export/history/csv?${params.toString()}`);
+                if (!response.ok) throw new Error('Ошибка экспорта');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `item_${itemId}_history.csv`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
