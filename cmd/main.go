@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/configuration"
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/db"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/server"
 	"github.com/wb-go/wbf/logger"
 )
@@ -37,15 +38,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("Ошибка создания логгера: %v", err)
 	}
-	/*
-		// получаем экземпляр БД
-		storageDB, err := db.InitDB(ctx, &cfg.DB, appLogger)
-		if err != nil {
-			appLogger.Error("ошибка подключения к БД", "error", err)
-			return
-		}
-		defer func() { _ = db.CloseDB(storageDB) }()
 
+	// получаем экземпляр БД
+	storageDB, err := db.InitDB(ctx, &cfg.DB, appLogger)
+	if err != nil {
+		appLogger.Error("ошибка подключения к БД", "error", err)
+		return
+	}
+	defer func() { _ = db.CloseDB(storageDB) }()
+	/*
 		// получаем экземпляр слоя бизнес-логики
 		service := service.InitService(ctx, storageDB)
 	*/

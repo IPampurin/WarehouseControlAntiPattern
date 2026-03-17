@@ -12,7 +12,7 @@ type Item struct {
 // CreateUpdateItemRequest — тело запроса для создания нового товара или обновления существующего
 // (POST /items, PUT /items/{id})
 type CreateUpdateItemRequest struct {
-	Name     string  `json:"name"      binding:"required"`        // название товара, обязательно
+	Name     string  `json:"name"       binding:"required"`       // название товара, обязательно
 	Quantity int     `json:"quantity"   binding:"required,min=0"` // количество, неотрицательное
 	Price    float64 `json:"price"      binding:"required,min=0"` // цена, неотрицательная
 }
