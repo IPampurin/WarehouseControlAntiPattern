@@ -30,6 +30,17 @@ type ItemHistory struct {
 	Action    string    `db:"action"`     // действие (INSERT, UPDATE, DELETE)
 	OldData   []byte    `db:"old_data"`   // предыдущие данные (JSONB как []byte)
 	NewData   []byte    `db:"new_data"`   // новые данные (JSONB как []byte)
-	ChangedBy *int      `db:"changed_by"` // id изменившего (может быть NULL, если пользователя больше нет)
+	ChangedBy *int      `db:"changed_by"` // id пользователя, совершившего изменение (может быть NULL, если пользователь удалён)
 	ChangedAt time.Time `db:"changed_at"` // время изменений
+}
+
+// HistoryFilter - структура для фильтрации истории, используется в StorageItemsHistory
+type HistoryFilter struct {
+	ItemID   int       // id товара (0 - все товары)
+	FromDate time.Time // начало периода (zero - не учитывается)
+	ToDate   time.Time // конец периода (zero - не учитывается)
+	UserID   int       // id пользователя (0 - все)
+	Action   string    // действие (INSERT, UPDATE, DELETE), пустая строка - все
+	Limit    int       // максимальное количество записей (по умолчанию 100)
+	Offset   int       // смещение для пагинации
 }
