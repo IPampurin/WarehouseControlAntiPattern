@@ -70,3 +70,13 @@ type ExportHistoryQuery struct {
 type ErrorResponse struct {
 	Error string `json:"error"` // текст ошибки
 }
+
+// LoginRequest — тело запроса на вход
+type LoginRequest struct {
+	Role string `json:"role" binding:"required,oneof=admin manager viewer"` // роль пользователя (admin, manager, viewer)
+}
+
+// LoginResponse — ответ сервера на успешный вход
+type LoginResponse struct {
+	Token string `json:"token"` // JWT-токен для аутентификации
+}

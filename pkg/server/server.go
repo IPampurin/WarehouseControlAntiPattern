@@ -31,16 +31,23 @@ func Run(ctx context.Context, cfgServer *configuration.ConfServer, svc *service.
 		log.LogRequest(c.Request.Context(), c.Request.Method, c.Request.URL.Path, c.Writer.Status(), duration)
 	})
 
-	// регистрируем эндпоинты
-	engine.POST("/items", api.CreateItem(svc, log))                   // создать запись
-	engine.GET("/items", api.GetItems(svc, log))                      // получить список записей
-	engine.PUT("/items/:id", api.UpdateItem(svc, log))                // обновить запись
-	engine.DELETE("/items/:id", api.DeleteItem(svc, log))             // удалить запись
-	engine.GET("/items/:id/history", api.GetItemHistory(svc, log))    // получить историю по записи
-	engine.GET("/history", api.GetGlobalHistory(svc, log))            // получить всю историю
-	engine.GET("/history/compare", api.CompareHistory(svc, log))      // сравнить версии
-	engine.GET("/export/items/csv", api.ExportItemsCSV(svc, log))     // экспорт товаров в файл
-	engine.GET("/export/history/csv", api.ExportHistoryCSV(svc, log)) // экспорт истории в файл
+	// открытый эндпоинт для логина
+	engine.POST("/login", api.Login)
+
+	// защищённая группа маршрутов (требуется JWT)
+	protected := engine.Group("/")
+	protected.Use(api.AuthMiddleware())
+	{
+		protected.POST("/items", api.CreateItem(svc, log))
+		protected.GET("/items", api.GetItems(svc, log))
+		protected.PUT("/items/:id", api.UpdateItem(svc, log))
+		protected.DELETE("/items/:id", api.DeleteItem(svc, log))
+		protected.GET("/items/:id/history", api.GetItemHistory(svc, log))
+		protected.GET("/history", api.GetGlobalHistory(svc, log))
+		protected.GET("/history/compare", api.CompareHistory(svc, log))
+		protected.GET("/export/items/csv", api.ExportItemsCSV(svc, log))
+		protected.GET("/export/history/csv", api.ExportHistoryCSV(svc, log))
+	}
 
 	// раздаём статические файлы из папки ./web
 	engine.Static("/static", "./web")

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/auth"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/domain"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/service"
 	"github.com/gin-gonic/gin"
@@ -305,4 +306,35 @@ func ExportHistoryCSV(svc service.ServiceMethods, log logger.Logger) gin.Handler
 		c.Header("Content-Disposition", "attachment; filename=history.csv")
 		c.Data(http.StatusOK, "text/csv", data)
 	}
+}
+
+// Login обрабатывает POST /login
+// (назначает фиксированный userID в зависимости от роли)
+// (в реальном проекте здесь должна быть проверка учетных данных в базе данных)
+func Login(c *gin.Context) {
+
+	req := &LoginRequest{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректные данные: " + err.Error()})
+		return
+	}
+
+	// фиксированные id для упрощения
+	var userID int
+	switch req.Role {
+	case "admin":
+		userID = 1
+	case "manager":
+		userID = 2
+	case "viewer":
+		userID = 3
+	}
+
+	token, err := auth.GenerateToken(userID, req.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "ошибка генерации токена"})
+		return
+	}
+
+	c.JSON(http.StatusOK, LoginResponse{Token: token})
 }

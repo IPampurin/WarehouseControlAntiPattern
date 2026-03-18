@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/auth"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/configuration"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/db"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/server"
@@ -38,6 +39,14 @@ func main() {
 	)
 	if err != nil {
 		log.Fatalf("Ошибка создания логгера: %v", err)
+	}
+
+	// инициализация JWT секретным ключом
+	if cfg.AuthKey.SecretKey == "" {
+		appLogger.Warn("ВНИМАНИЕ: SECRET_KEY_JWT не задан, используется значение по умолчанию (небезопасно)")
+		auth.Init("default-secret-key") // устанавливаем запасное значение
+	} else {
+		auth.Init(cfg.AuthKey.SecretKey)
 	}
 
 	// получаем экземпляр БД

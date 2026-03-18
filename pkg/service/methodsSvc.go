@@ -12,24 +12,24 @@ import (
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/domain"
 )
 
-// getCurrentUserID извлекает ID пользователя из контекста ЗАГЛУШКА
+// getCurrentUserID извлекает id пользователя из контекста (устанавливается middleware)
 func getCurrentUserID(ctx context.Context) int {
 
 	if userID, ok := ctx.Value("userID").(int); ok {
 		return userID
 	}
 
-	return 1 // TODO: переделать
+	return 0 // 0 означает отсутствие пользователя (не должно случаться после middleware)
 }
 
-// getCurrentUserRole извлекает роль пользователя из контекста ЗАГЛУШКА
+// getCurrentUserRole извлекает роль пользователя из контекста
 func getCurrentUserRole(ctx context.Context) string {
 
 	if role, ok := ctx.Value("role").(string); ok {
 		return role
 	}
 
-	return "admin" // TODO: переделать
+	return "" // пустая строка – отсутствие роли
 }
 
 // checkRole проверяет, имеет ли текущий пользователь одну из разрешённых ролей
