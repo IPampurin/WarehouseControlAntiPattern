@@ -71,7 +71,7 @@ func (d *DataBase) GetItemByID(ctx context.Context, id int) (*domain.Item, error
 }
 
 // GetAllItems возвращает список всех товаров
-func (d *DataBase) GetAllItems(ctx context.Context) ([]domain.Item, error) {
+func (d *DataBase) GetAllItems(ctx context.Context) ([]*domain.Item, error) {
 
 	query := `SELECT id, name, quantity, price, created_at, updated_at
 	            FROM items
@@ -83,14 +83,15 @@ func (d *DataBase) GetAllItems(ctx context.Context) ([]domain.Item, error) {
 	}
 	defer rows.Close()
 
-	var items []domain.Item
+	items := make([]*domain.Item, 0)
+
 	for rows.Next() {
-		var dbItem Item
+		dbItem := &Item{}
 		err := rows.Scan(&dbItem.ID, &dbItem.Name, &dbItem.Quantity, &dbItem.Price, &dbItem.CreatedAt, &dbItem.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("ошибка сканирования GetAllItems: %w", err)
 		}
-		items = append(items, *dbItemToDomainItem(&dbItem))
+		items = append(items, dbItemToDomainItem(dbItem))
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("ошибка итерации GetAllItems: %w", err)

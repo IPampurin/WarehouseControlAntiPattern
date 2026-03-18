@@ -1,7 +1,19 @@
 package domain
 
 import (
+	"errors"
 	"time"
+)
+
+var (
+	// ErrNotFound возвращается, когда запрашиваемый ресурс не найден
+	ErrNotFound = errors.New("resource not found")
+
+	// ErrForbidden возвращается при недостаточных правах доступа
+	ErrForbidden = errors.New("access forbidden")
+
+	// ErrInvalidInput возвращается при невалидных данных запроса
+	ErrInvalidInput = errors.New("invalid input data")
 )
 
 // User представляет пользователя системы
@@ -44,4 +56,18 @@ type HistoryFilter struct {
 	Action   string    // если не пустая, то только указанное действие (INSERT, UPDATE, DELETE)
 	Limit    int       // максимальное количество записей (0 - использовать значение по умолчанию)
 	Offset   int       // смещение для пагинации
+}
+
+// DiffResponse — результат сравнения двух версий товара
+type DiffResponse struct {
+	FromID  int           `json:"from_id"` // ID первой версии (источник)
+	ToID    int           `json:"to_id"`   // ID второй версии (цель)
+	Changes []FieldChange `json:"changes"` // список изменённых полей
+}
+
+// FieldChange описывает изменение одного поля между двумя версиями
+type FieldChange struct {
+	Field    string      `json:"field"`               // название поля (name, quantity, price)
+	OldValue interface{} `json:"old_value,omitempty"` // значение в первой версии (может отсутствовать при создании)
+	NewValue interface{} `json:"new_value,omitempty"` // значение во второй версии (может отсутствовать при удалении)
 }

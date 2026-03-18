@@ -87,9 +87,9 @@ func dbItemHistoryToDomainItemHistory(h *ItemHistory) *domain.ItemHistory {
 }
 
 // domainHistoryFilterToDBHistoryFilter преобразует доменную модель HistoryFilter в модель HistoryFilter базы данных
-func domainHistoryFilterToDBHistoryFilter(f domain.HistoryFilter) HistoryFilter {
+func domainHistoryFilterToDBHistoryFilter(f *domain.HistoryFilter) *HistoryFilter {
 
-	return HistoryFilter{
+	return &HistoryFilter{
 		ItemID:   f.ItemID,
 		FromDate: f.FromDate,
 		ToDate:   f.ToDate,

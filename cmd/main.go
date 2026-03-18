@@ -10,6 +10,7 @@ import (
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/configuration"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/db"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/server"
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/service"
 	"github.com/wb-go/wbf/logger"
 )
 
@@ -46,12 +47,12 @@ func main() {
 		return
 	}
 	defer func() { _ = db.CloseDB(storageDB) }()
-	/*
-		// получаем экземпляр слоя бизнес-логики
-		service := service.InitService(ctx, storageDB)
-	*/
+
+	// получаем экземпляр слоя бизнес-логики
+	service := service.InitService(ctx, storageDB)
+
 	// запускаем сервер
-	err = server.Run(ctx, &cfg.Server, appLogger)
+	err = server.Run(ctx, &cfg.Server, service, appLogger)
 	if err != nil {
 		appLogger.Error("Ошибка сервера", "error", err)
 		cancel()

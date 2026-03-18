@@ -6,13 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/api"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/configuration"
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/service"
 	"github.com/gin-gonic/gin"
 	"github.com/wb-go/wbf/ginext"
 	"github.com/wb-go/wbf/logger"
 )
 
-func Run(ctx context.Context, cfgServer *configuration.ConfServer, log logger.Logger) error {
+func Run(ctx context.Context, cfgServer *configuration.ConfServer, svc *service.Service, log logger.Logger) error {
 
 	// создаём движок Gin через обёртку ginext
 	engine := ginext.New(cfgServer.GinMode)
@@ -28,19 +30,18 @@ func Run(ctx context.Context, cfgServer *configuration.ConfServer, log logger.Lo
 		// используем переданный логгер для записи информации о запросе
 		log.LogRequest(c.Request.Context(), c.Request.Method, c.Request.URL.Path, c.Writer.Status(), duration)
 	})
-	/*
-		// регистрируем эндпоинты
-		engine.POST("/items", api.CreateItem(svc, log))                              // создать запись
-		engine.GET("/items", api.GetItemsPeriodSorted(svc, log))                     // получить список записей за период с сортировкой
-		engine.PUT("/items/:id", api.UpdateItem(svc, log))                           // обновить запись
-		engine.DELETE("/items/:id", api.DelItem(svc, log))                           // удалить запись
-		engine.GET("/items/:id/history", api.GetItemsHistory(svc, log))              // получить историю по записи
-		engine.GET("/export/csv", api.ExportCSVFile(svc, log))                       // экспорт записей за период в формате CSV
-	*/
-	/*
-		engine.GET("/analytics", api.GetAnalytic(svc, log))                          // общая аналитика за период
-		engine.GET("/analytics/by-category", api.GetAnalyticGroupCategory(svc, log)) // аналитика с группировкой по категориям
-	*/
+
+	// регистрируем эндпоинты
+	engine.POST("/items", api.CreateItem(svc, log))                   // создать запись
+	engine.GET("/items", api.GetItems(svc, log))                      // получить список записей
+	engine.PUT("/items/:id", api.UpdateItem(svc, log))                // обновить запись
+	engine.DELETE("/items/:id", api.DeleteItem(svc, log))             // удалить запись
+	engine.GET("/items/:id/history", api.GetItemHistory(svc, log))    // получить историю по записи
+	engine.GET("/history", api.GetGlobalHistory(svc, log))            // получить всю историю
+	engine.GET("/history/compare", api.CompareHistory(svc, log))      // сравнить версии
+	engine.GET("/export/items/csv", api.ExportItemsCSV(svc, log))     // экспорт товаров в файл
+	engine.GET("/export/history/csv", api.ExportHistoryCSV(svc, log)) // экспорт истории в файл
+
 	// раздаём статические файлы из папки ./web
 	engine.Static("/static", "./web")
 	// отдельные страницы

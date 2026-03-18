@@ -42,7 +42,7 @@ type StorageItems interface {
 	GetItemByID(ctx context.Context, id int) (*domain.Item, error)
 
 	// GetAllItems возвращает список всех товаров
-	GetAllItems(ctx context.Context) ([]domain.Item, error)
+	GetAllItems(ctx context.Context) ([]*domain.Item, error)
 
 	// UpdateItem обновляет существующий товар
 	UpdateItem(ctx context.Context, item *domain.Item) error
@@ -56,11 +56,11 @@ type StorageItemsHistory interface {
 
 	// GetHistory возвращает записи истории с фильтром и пагинацией,
 	// параметры filter позволяют задать item_id, период, пользователя, действие, лимит и смещение
-	GetHistory(ctx context.Context, filter domain.HistoryFilter) ([]domain.ItemHistory, error)
+	GetHistory(ctx context.Context, filter *domain.HistoryFilter) ([]*domain.ItemHistory, error)
 
 	// GetHistoryByID возвращает одну запись истории по её ID
 	GetHistoryByID(ctx context.Context, id int) (*domain.ItemHistory, error)
 
 	// GetHistoryCount возвращает общее количество записей, удовлетворяющих фильтру (для пагинации)
-	GetHistoryCount(ctx context.Context, filter domain.HistoryFilter) (int, error)
+	GetHistoryCount(ctx context.Context, filter *domain.HistoryFilter) (int, error)
 }

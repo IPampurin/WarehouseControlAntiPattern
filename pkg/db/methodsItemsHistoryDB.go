@@ -10,7 +10,7 @@ import (
 )
 
 // GetHistory возвращает записи истории с фильтрацией и пагинацией
-func (d *DataBase) GetHistory(ctx context.Context, filter domain.HistoryFilter) ([]domain.ItemHistory, error) {
+func (d *DataBase) GetHistory(ctx context.Context, filter *domain.HistoryFilter) ([]*domain.ItemHistory, error) {
 
 	// преобразуем доменный фильтр в фильтр для БД
 	dbFilter := domainHistoryFilterToDBHistoryFilter(filter)
@@ -71,7 +71,7 @@ func (d *DataBase) GetHistory(ctx context.Context, filter domain.HistoryFilter) 
 	}
 	defer rows.Close()
 
-	history := make([]domain.ItemHistory, 0)
+	history := make([]*domain.ItemHistory, 0)
 	for rows.Next() {
 
 		dbHistory := &ItemHistory{}
@@ -80,7 +80,7 @@ func (d *DataBase) GetHistory(ctx context.Context, filter domain.HistoryFilter) 
 			return nil, fmt.Errorf("ошибка сканирования GetHistory: %w", err)
 		}
 
-		history = append(history, *dbItemHistoryToDomainItemHistory(dbHistory))
+		history = append(history, dbItemHistoryToDomainItemHistory(dbHistory))
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("ошибка итерации GetHistory: %w", err)
@@ -112,7 +112,7 @@ func (d *DataBase) GetHistoryByID(ctx context.Context, id int) (*domain.ItemHist
 }
 
 // GetHistoryCount возвращает общее количество записей, удовлетворяющих фильтру
-func (d *DataBase) GetHistoryCount(ctx context.Context, filter domain.HistoryFilter) (int, error) {
+func (d *DataBase) GetHistoryCount(ctx context.Context, filter *domain.HistoryFilter) (int, error) {
 
 	dbFilter := domainHistoryFilterToDBHistoryFilter(filter)
 
