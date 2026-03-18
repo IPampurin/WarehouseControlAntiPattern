@@ -9,23 +9,26 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/auth"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/domain"
 )
 
-// getCurrentUserID извлекает id пользователя из контекста (устанавливается middleware)
+/*
+// getCurrentUserID извлекает id пользователя из контекста
 func getCurrentUserID(ctx context.Context) int {
 
-	if userID, ok := ctx.Value("userID").(int); ok {
+	if userID, ok := ctx.Value(auth.UserIDKey).(int); ok {
 		return userID
 	}
 
-	return 0 // 0 означает отсутствие пользователя (не должно случаться после middleware)
+	return 0
 }
+*/
 
 // getCurrentUserRole извлекает роль пользователя из контекста
 func getCurrentUserRole(ctx context.Context) string {
 
-	if role, ok := ctx.Value("role").(string); ok {
+	if role, ok := ctx.Value(auth.RoleKey).(string); ok {
 		return role
 	}
 
@@ -210,7 +213,7 @@ func (s *Service) GetHistoryByID(ctx context.Context, id int) (*domain.ItemHisto
 // CompareHistoryVersions сравнивает две записи истории и возвращает структуру с различиями
 func (s *Service) CompareHistoryVersions(ctx context.Context, id1, id2 int) (*domain.DiffResponse, error) {
 
-	// прверка прав
+	// проверка прав
 	if err := s.checkRole(ctx, "admin"); err != nil {
 		return nil, err
 	}
@@ -219,7 +222,6 @@ func (s *Service) CompareHistoryVersions(ctx context.Context, id1, id2 int) (*do
 	if err != nil {
 		return nil, err
 	}
-
 	if h1 == nil {
 		return nil, domain.ErrNotFound
 	}
@@ -228,42 +230,31 @@ func (s *Service) CompareHistoryVersions(ctx context.Context, id1, id2 int) (*do
 	if err != nil {
 		return nil, err
 	}
-
 	if h2 == nil {
 		return nil, domain.ErrNotFound
 	}
 
-	// парсим JSON данные из записей
-	data1 := make(map[string]interface{})
-	data2 := make(map[string]interface{})
-
-	if len(h1.NewData) > 0 { // используем NewData как состояние после действия
-		if err := json.Unmarshal(h1.NewData, &data1); err != nil {
-			return nil, fmt.Errorf("не удалось разобрать данные первой версии: %w", err)
-		}
-	} else if len(h1.OldData) > 0 {
-		if err := json.Unmarshal(h1.OldData, &data1); err != nil {
-			return nil, fmt.Errorf("не удалось разобрать данные первой версии: %w", err)
-		}
+	// определяем, какая запись старше по времени
+	var older, newer *domain.ItemHistory
+	if h1.ChangedAt.Before(h2.ChangedAt) {
+		older = h1
+		newer = h2
+	} else {
+		older = h2
+		newer = h1
 	}
 
-	if len(h2.NewData) > 0 {
-		if err := json.Unmarshal(h2.NewData, &data2); err != nil {
-			return nil, fmt.Errorf("не удалось разобрать данные второй версии: %w", err)
-		}
-	} else if len(h2.OldData) > 0 {
-		if err := json.Unmarshal(h2.OldData, &data2); err != nil {
-			return nil, fmt.Errorf("не удалось разобрать данные второй версии: %w", err)
-		}
-	}
+	// извлекаем данные для сравнения
+	dataOlder := extractState(older)
+	dataNewer := extractState(newer)
 
 	// сравниваем поля name, quantity, price
 	changes := []domain.FieldChange{}
 	fields := []string{"name", "quantity", "price"}
 
 	for _, field := range fields {
-		oldVal, oldOk := data1[field]
-		newVal, newOk := data2[field]
+		oldVal, oldOk := dataOlder[field]
+		newVal, newOk := dataNewer[field]
 		if oldOk && newOk {
 			// если значения различаются
 			if fmt.Sprint(oldVal) != fmt.Sprint(newVal) {
@@ -291,10 +282,23 @@ func (s *Service) CompareHistoryVersions(ctx context.Context, id1, id2 int) (*do
 	}
 
 	return &domain.DiffResponse{
-		FromID:  id1,
-		ToID:    id2,
+		FromID:  older.ID, // возвращаем ID старой версии
+		ToID:    newer.ID, // ID новой версии
 		Changes: changes,
 	}, nil
+}
+
+// extractState возвращает map с данными товара из записи истории
+func extractState(h *domain.ItemHistory) map[string]interface{} {
+
+	data := make(map[string]interface{})
+	if len(h.NewData) > 0 {
+		_ = json.Unmarshal(h.NewData, &data)
+	} else if len(h.OldData) > 0 {
+		_ = json.Unmarshal(h.OldData, &data)
+	}
+
+	return data
 }
 
 // экспорт

@@ -7,6 +7,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// тип для ключей контекста, чтобы избежать коллизий
+type contextKey string
+
+const (
+	UserIDKey contextKey = "userID" // ключ для хранения id пользователя в контексте
+	RoleKey   contextKey = "role"   // ключ для хранения роли пользователя в контексте
+)
+
 // secretKey — ключ для подписи JWT
 var secretKey []byte
 

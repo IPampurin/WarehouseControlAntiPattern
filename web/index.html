@@ -10,19 +10,16 @@
     <div class="logo">WarehouseControl</div>
     <div class="triple-layout">
         <div class="circle-container">
-            <a href="/admin.html" class="circle-button" onclick="setRole('admin')">Администратор</a>
+            <button class="circle-button" data-role="admin">Администратор</button>
         </div>
         <div class="circle-container">
-            <a href="/manager.html" class="circle-button" onclick="setRole('manager')">Менеджер</a>
+            <button class="circle-button" data-role="manager">Менеджер</button>
         </div>
         <div class="circle-container">
-            <a href="/viewer.html" class="circle-button" onclick="setRole('viewer')">Наблюдатель</a>
+            <button class="circle-button" data-role="viewer">Наблюдатель</button>
         </div>
     </div>
-    <script>
-        function setRole(role) {
-            localStorage.setItem('userRole', role);
-        }
-    </script>
+    <div id="notification" class="notification"></div>
+    <script src="/static/script.js"></script>
 </body>
 </html>

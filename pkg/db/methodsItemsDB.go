@@ -18,7 +18,7 @@ func (d *DataBase) CreateItem(ctx context.Context, item *domain.Item) error {
 	if err != nil {
 		return fmt.Errorf("ошибка начала транзакции CreateItem: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	if err := setUserIDInTransaction(ctx, tx, userID); err != nil {
 		return fmt.Errorf("ошибка установки пользователя CreateItem: %w", err)
@@ -109,7 +109,7 @@ func (d *DataBase) UpdateItem(ctx context.Context, item *domain.Item) error {
 	if err != nil {
 		return fmt.Errorf("ошибка начала транзакции UpdateItem: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	if err := setUserIDInTransaction(ctx, tx, userID); err != nil {
 		return fmt.Errorf("ошибка установки пользователя UpdateItem: %w", err)
@@ -152,7 +152,7 @@ func (d *DataBase) DeleteItem(ctx context.Context, id int) error {
 	if err != nil {
 		return fmt.Errorf("ошибка начала транзакции DeleteItem: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	if err := setUserIDInTransaction(ctx, tx, userID); err != nil {
 		return fmt.Errorf("ошибка установки пользователя DeleteItem: %w", err)

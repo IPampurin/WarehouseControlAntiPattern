@@ -32,8 +32,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// сохраняем данные пользователя в контексте запроса
-		ctx := context.WithValue(c.Request.Context(), "userID", claims.UserID)
-		ctx = context.WithValue(ctx, "role", claims.Role)
+		ctx := context.WithValue(c.Request.Context(), auth.UserIDKey, claims.UserID)
+		ctx = context.WithValue(ctx, auth.RoleKey, claims.Role)
 		c.Request = c.Request.WithContext(ctx)
 
 		c.Next()

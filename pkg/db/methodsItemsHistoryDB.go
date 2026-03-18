@@ -62,7 +62,7 @@ func (d *DataBase) GetHistory(ctx context.Context, filter *domain.HistoryFilter)
 	if dbFilter.Offset > 0 {
 		query += fmt.Sprintf(" OFFSET $%d", argPos)
 		args = append(args, dbFilter.Offset)
-		argPos++
+		// argPos++
 	}
 
 	rows, err := d.Pool.Query(ctx, query, args...)
@@ -146,7 +146,7 @@ func (d *DataBase) GetHistoryCount(ctx context.Context, filter *domain.HistoryFi
 	if dbFilter.Action != "" {
 		query += fmt.Sprintf(" AND action = $%d", argPos)
 		args = append(args, dbFilter.Action)
-		argPos++
+		// argPos++
 	}
 
 	count := 0

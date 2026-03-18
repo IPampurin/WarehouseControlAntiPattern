@@ -23,24 +23,7 @@
             </div>
         </div>
     </div>
-
     <div id="notification" class="notification"></div>
-
     <script src="/static/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const role = localStorage.getItem('userRole');
-            if (role !== 'viewer') {
-                window.location.href = '/';
-                return;
-            }
-            loadItems();
-
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                localStorage.removeItem('userRole');
-                window.location.href = '/';
-            });
-        });
-    </script>
 </body>
 </html>

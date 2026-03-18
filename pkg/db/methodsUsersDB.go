@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/auth"
 	"github.com/IPampurin/WarehouseControlAntiPattern/pkg/domain"
 	"github.com/jackc/pgx/v5"
 )
@@ -12,7 +13,7 @@ import (
 // getUserIDFromContext извлекает id пользователя из контекста
 func getUserIDFromContext(ctx context.Context) int {
 
-	if userID, ok := ctx.Value("userID").(int); ok {
+	if userID, ok := ctx.Value(auth.UserIDKey).(int); ok {
 		return userID
 	}
 
@@ -27,7 +28,8 @@ func setUserIDInTransaction(ctx context.Context, tx pgx.Tx, userID int) error {
 		return err
 	}
 
-	_, err := tx.Exec(ctx, "SET LOCAL app.current_user_id = $1", userID)
+	query := fmt.Sprintf("SET LOCAL app.current_user_id = %d", userID)
+	_, err := tx.Exec(ctx, query)
 
 	return err
 }
