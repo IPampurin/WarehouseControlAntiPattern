@@ -1,4 +1,3 @@
-// pkg/api/handlers.go
 package api
 
 import (
@@ -34,7 +33,6 @@ func CreateItem(svc service.ServiceMethods, log logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		req := &CreateUpdateItemRequest{}
-
 		if err := c.ShouldBindJSON(req); err != nil {
 			c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 			return
@@ -137,11 +135,18 @@ func GetItemHistory(svc service.ServiceMethods, log logger.Logger) gin.HandlerFu
 			return
 		}
 
-		fromDate, _ := parseTimeSafe(query.FromDate)
-		toDate, _ := parseTimeSafe(query.ToDate)
+		fromDate, err := parseTimeSafe(query.FromDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный формат from_date"})
+			return
+		}
+		toDate, err := parseTimeSafe(query.ToDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный формат to_date"})
+			return
+		}
 
 		filter := &domain.HistoryFilter{
-			ItemID:   itemID,
 			FromDate: fromDate,
 			ToDate:   toDate,
 			UserID:   query.UserID,
@@ -149,6 +154,8 @@ func GetItemHistory(svc service.ServiceMethods, log logger.Logger) gin.HandlerFu
 			Limit:    query.Limit,
 			Offset:   query.Offset,
 		}
+
+		// itemID передаётся отдельным параметром, в сервисе он будет установлен принудительно
 
 		history, err := svc.GetItemHistory(c.Request.Context(), itemID, filter)
 		if err != nil {
@@ -175,8 +182,16 @@ func GetGlobalHistory(svc service.ServiceMethods, log logger.Logger) gin.Handler
 			return
 		}
 
-		fromDate, _ := parseTimeSafe(query.FromDate)
-		toDate, _ := parseTimeSafe(query.ToDate)
+		fromDate, err := parseTimeSafe(query.FromDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный формат from_date"})
+			return
+		}
+		toDate, err := parseTimeSafe(query.ToDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный формат to_date"})
+			return
+		}
 
 		filter := &domain.HistoryFilter{
 			ItemID:   query.ItemID,
@@ -219,7 +234,6 @@ func CompareHistory(svc service.ServiceMethods, log logger.Logger) gin.HandlerFu
 			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный параметр 'from'"})
 			return
 		}
-
 		toID, err := strconv.Atoi(toStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный параметр 'to'"})
@@ -263,8 +277,16 @@ func ExportHistoryCSV(svc service.ServiceMethods, log logger.Logger) gin.Handler
 			return
 		}
 
-		fromDate, _ := parseTimeSafe(query.FromDate)
-		toDate, _ := parseTimeSafe(query.ToDate)
+		fromDate, err := parseTimeSafe(query.FromDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный формат from_date"})
+			return
+		}
+		toDate, err := parseTimeSafe(query.ToDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "некорректный формат to_date"})
+			return
+		}
 
 		filter := &domain.HistoryFilter{
 			ItemID:   query.ItemID,
